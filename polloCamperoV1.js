@@ -3,8 +3,7 @@ const PDVS = [
     115, 109, 136, 170, 177, 181, 191, 202, 632, 635, 638, 639, 669, 677, 692, 702, 711, 720, 124, 141, 143, 182, 192, 196, 637, 648, 658, 659, 671, 681, 690, 703, 705, 718, 146, 178, 179, 197, 633, 634, 640, 644, 654, 656, 679, 693, 698, 699, 700, 708, 112, 114, 120, 134, 139, 149, 164, 174, 186, 642, 651, 668, 686, 688, 689, 696, 701, 707, 709, 715, 723, 130, 138, 140, 142, 144, 155, 160, 163, 641, 646, 653, 672, 673, 687, 697, 710, 714, 716, 145, 159, 631, 643, 650, 652, 655, 660, 662, 667, 680, 704, 106, 108, 118, 121, 126, 137, 147, 148, 152, 156, 173, 193, 195, 199, 200, 201, 645, 657, 661, 664, 706, 713, 721, 128, 129, 131, 151, 165, 172, 194, 636, 647, 649, 666, 674, 675, 682, 683, 684, 685, 695, 717, 719, 102, 101, 111, 129, 141, 146, 653, 660, 671, 682, 685, 689, 125, 139, 142, 144, 651, 669, 675, 687, 101, 118, 668, 700, 704, 102, 132, 133, 657, 661, 676, 678, 108, 115, 127, 652, 656, 658, 659, 664, 665, 679, 681, 702, 703, 706, 116, 117, 124, 138, 143, 662, 667, 708, 104, 114, 120, 126, 655, 672, 674, 701, 707, 105, 109, 119, 130, 145, 654, 663, 677, 683, 705
 ];
 
-Qualtrics.SurveyEngine.addOnload(function()
-{
+Qualtrics.SurveyEngine.addOnload(function () {
     var that = this;
     var q = jQuery("#" + this.questionId);
     this.hideNextButton();
@@ -13,24 +12,26 @@ Qualtrics.SurveyEngine.addOnload(function()
     var hasReached17Digits = false;
 
     // Se ejecuta cuando se pega algo en el campo
-    q.find("input[type=text]").on("paste touchend", function(event) {
+    q.find("input[type=text]").on("paste touchend", function (event) {
         var pastedData = event.originalEvent.clipboardData.getData('text');
         if (pastedData.length > 17) {
-            // Si se pega un texto con más de 17 caracteres, lo recorta a 17
             event.target.value = pastedData.substring(0, 17);
         }
-        validCode(event.target.value, that);
+        // Espera un momento antes de validar
+        setTimeout(() => {
+            validCode(event.target.value, that);
+        }, 0);
     });
 
     // Evento keyup cuando se escribe en el campo
-    q.find("input[type=text]").on("keyup touchend", function(event) {
+    q.find("input[type=text]").on("keyup touchend", function (event) {
         if (event.target.value.length <= 17) {
             validCode(event.target.value, that);
         }
     });
 
     // Evento keydown para prevenir más de 17 caracteres
-    q.find("input[type=text]").on("keydown touchstart", function(event) {
+    q.find("input[type=text]").on("keydown touchstart", function (event) {
         var input = event.target;
         if (input.value.length >= 17 && event.keyCode !== 8 && event.keyCode !== 46) {
             hasReached17Digits = true;
@@ -39,7 +40,7 @@ Qualtrics.SurveyEngine.addOnload(function()
     });
 
     // Evento para clicks en botones
-    jQuery("button").on("click", function(event) {
+    jQuery("button").on("click", function (event) {
         var codeLength = q.find("input[type=text]").val().length;
         if (codeLength == 17 && !pase) {
             event.preventDefault();
@@ -49,31 +50,30 @@ Qualtrics.SurveyEngine.addOnload(function()
     });
 });
 
-Qualtrics.SurveyEngine.addOnPageSubmit(function()
-{
+Qualtrics.SurveyEngine.addOnPageSubmit(function () {
     /* Aquí puedes agregar código si necesitas ejecutar algo al enviar la página */
 });
 
-Qualtrics.SurveyEngine.addOnReady(function()
-{
+Qualtrics.SurveyEngine.addOnReady(function () {
     /* Aquí puedes agregar código que se ejecute cuando la página esté completamente cargada */
 });
 
-Qualtrics.SurveyEngine.addOnUnload(function()
-{
+Qualtrics.SurveyEngine.addOnUnload(function () {
     /* Aquí puedes agregar código que se ejecute cuando la página se descargue */
 });
 
 function validCode(digits, that) {
-    if (digits.length > 17) {
-        return; // Si tiene más de 17 dígitos, no hacer nada y salir de la función
-    }
-
     if (digits.length == 17) {
         var text = digits;
-        // Número de la tienda
-        var pdv = text.substring(1, 2) + text.substring(12, 13) + text.substring(8, 9) + text.substring(10, 11);
+        //Numero de la tienda
+        var pdv1 = text.substring(1, 2);
+        var pdv2 = text.substring(12, 13);
+        var pdv3 = text.substring(8, 9);
+        var pdv4 = text.substring(10, 11);
+        var pdv = pdv1 + pdv2 + pdv3 + pdv4;
+
         Qualtrics.SurveyEngine.setEmbeddedData('PDV', pdv);
+        //alert(pdv);
 
         // País
         var pais = text.substring(0, 1);
@@ -88,8 +88,6 @@ function validCode(digits, that) {
             case "3":
                 pais_nom = "SLV";
                 break;
-            default:
-                pais_nom = "Desconocido";
         }
         Qualtrics.SurveyEngine.setEmbeddedData('Pais_id', pais);
         Qualtrics.SurveyEngine.setEmbeddedData('Pais', pais_nom);
@@ -179,12 +177,8 @@ function validCode(digits, that) {
             case "7":
                 if (pais == "2") {
                     canal = "3PD";
-                } else {
-                    canal = "Desconocido";
                 }
                 break;
-            default:
-                canal = "Desconocido";
         }
         Qualtrics.SurveyEngine.setEmbeddedData('Canal', canal);
 
@@ -214,52 +208,79 @@ function validCode(digits, that) {
 
         pase = true; // Asumimos que el código es válido inicialmente
         var msj = "";
-
+        var error = "";
+        var fechaJulianaActual = fechaJulianaHoy();
+        var FechaHoy = FechaHoy();
+        var banderaFechaError = false;
         // Validaciones
         if (pais != "1" && pais != "2" && pais != "3") {
             pase = false;
-            alert("El país no es válido");
-            msj = "Verifique que el código sea válido en el valor del pais";
+            //alert("El país no es válido");
+            //msj = "Verifique que el código sea válido en el valor del pais";
+            msj = "Verifique que el código sea válido, digite nuevamente";
+            error = "Error en el país";
             valor += 1;
             localStorage.setItem('miVariable', valor);
+            //Qualtrics.SurveyEngine.setEmbeddedData('Error en la fecha', tipoError);
+
         }
 
         var diferenciaEnDias = Math.floor((fechaActual - fecha_comp) / (1000 * 60 * 60 * 24));
         if (diferenciaEnDias > 7) {
             pase = false;
-            alert("La fecha no puede ser mayor a 7 días" + diferenciaEnDias);
-            msj = "Verifique que el código sea válido en la fecha";
+            //alert("La fecha no puede ser mayor a 7 días" + diferenciaEnDias);
+            //msj = "Verifique que el código sea válido en la fecha";
+            msj = "Verifique que el código sea válido, digite nuevamente";
+            error = "Error en la fecha";
             valor += 1;
             localStorage.setItem('miVariable', valor);
+            banderaFechaError = true;
         }
 
         if (diferenciaEnDias < 0) {
-            alert("La fecha no puede ser mayor a la actual " + diferenciaEnDias);
+            //alert("La fecha no puede ser mayor a la actual " + diferenciaEnDias);
             pase = false;
-            msj = "Verifique que el código sea válido en el valor de los dias";
+            error = "Error en la fecha";
+            //msj = "Verifique que el código sea válido en el valor de los dias";
+            msj = "Verifique que el código sea válido, digite nuevamente";
             valor += 1;
             localStorage.setItem('miVariable', valor);
+            banderaFechaError = true;
         }
 
         if (canal_num > 7 || canal_num == 0 || canal == "Desconocido") {
             pase = false;
-            alert("El canal no es válido");
-            msj = "Verifique que el código sea válido en el valor del canal";
+            //alert("El canal no es válido");
+            //msj = "Verifique que el código sea válido en el valor del canal";
+            error = "Error en el canal";
+            msj = "Verifique que el código sea válido, digite nuevamente";
             valor += 1;
             localStorage.setItem('miVariable', valor);
+            //Qualtrics.SurveyEngine.setEmbeddedData('Error en el canal', tipoError);
         }
         if (!PDVS.includes(parseInt(pdv))) {
             pase = false;
-            alert("El PDV no es válido");
-            msj = "Verifique que el código sea válido en el valor del PDV";
+            //alert("El PDV no es válido");
+            //msj = "Verifique que el código sea válido en el valor del PDV";
+            error = "Error en el PDV";
+            msj = "Verifique que el código sea válido, digite nuevamente";
             valor += 1;
             localStorage.setItem('miVariable', valor);
+            //Qualtrics.SurveyEngine.setEmbeddedData('Error en el PDV', tipoError);
         }
+        if (banderaFechaError = true) {
+            Qualtrics.SurveyEngine.setEmbeddedData('Fecha', FechaHoy);
+            Qualtrics.SurveyEngine.setEmbeddedData('Juliana', fechaJulianaActual);
+            alert("Fecha hoy " + FechaHoy);
+            alert("Fecha juliana hoy " + fechaJulianaActual);
+        }
+        Qualtrics.SurveyEngine.setEmbeddedData('tipoError', error);
+
         // Mostrar u ocultar el botón "Siguiente" y el mensaje de error
         if (pase == true || valor >= 2) {
             var var_algo = "Algoritmo invalido";
             that.showNextButton();
-            if (valor >= 2 ) {
+            if (valor >= 2) {
                 Qualtrics.SurveyEngine.setEmbeddedData('Algoritmo invalido', var_algo);
                 Qualtrics.SurveyEngine.setEmbeddedData('Algoritmo', var_algo);
             }
@@ -282,6 +303,24 @@ function validCode(digits, that) {
         if (valor < 2 && pase == false) {
             textoError.style.display = 'block';
             textoError.innerText = msj || "Verifique que el código sea válido"; // Mostrar el mensaje de error específico
+            // Mostrar el mensaje de error específico durante 5 segundos
+            textoError.style.display = 'block';
+            textoError.innerText = msj || "Verifique que el código sea válido, digite nuevamente";
+
+            // Estilos para el mensaje de error
+            textoError.style.marginTop = '10px';
+            textoError.style.fontWeight = 'bold';
+            textoError.style.fontFamily = 'inherit';
+
+            // Añadir el mensaje de error al contenedor de la pregunta si aún no está añadido
+            if (!textoError.parentNode) {
+                contenedorPregunta.appendChild(textoError);
+            }
+
+            // Ocultar el mensaje después de 5 segundos
+            setTimeout(() => {
+                textoError.style.display = 'none';
+            }, 5000);
 
             // Estilos para el mensaje de error
             textoError.style.marginTop = '10px';
@@ -293,7 +332,7 @@ function validCode(digits, that) {
                 contenedorPregunta.appendChild(textoError);
             }
         } else {
-            textoError.style.display = 'none'; // Ocultar el mensaje si no hay error
+            // textoError.style.display = 'none'; // Ocultar el mensaje si no hay error
         }
     } else {
         pase = false; // Si el código no tiene 17 dígitos, no es válido aún
@@ -306,6 +345,26 @@ function validCode(digits, that) {
         }
     }
 }
+//funcion para que me regresa al fecha juiliana con 3 digitos correspondientes al dia
+function fechaJulianaHoy() {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const diff = now - startOfYear + ((startOfYear.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    return dayOfYear.toString().padStart(3, '0');
+}
+
+function FechaHoy() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    let mm = today.getMonth() + 1; // Months start at 0!
+    let dd = today.getDate();
+
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+
+    return yyyy + "-" + mm + "-" + dd + "T06:00:00.000Z";}
 
 window.addEventListener('beforeunload', function () {
     localStorage.removeItem('miVariable'); // Elimina el ítem

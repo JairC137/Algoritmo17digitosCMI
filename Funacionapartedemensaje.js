@@ -16,10 +16,12 @@ Qualtrics.SurveyEngine.addOnload(function()
     q.find("input[type=text]").on("paste touchend", function(event) {
         var pastedData = event.originalEvent.clipboardData.getData('text');
         if (pastedData.length > 17) {
-            // Si se pega un texto con más de 17 caracteres, lo recorta a 17
             event.target.value = pastedData.substring(0, 17);
         }
-        validCode(event.target.value, that);
+        // Espera un momento antes de validar
+        setTimeout(() => {
+            validCode(event.target.value, that);
+        }, 0);
     });
 
     // Evento keyup cuando se escribe en el campo
@@ -65,15 +67,17 @@ Qualtrics.SurveyEngine.addOnUnload(function()
 });
 
 function validCode(digits, that) {
-    if (digits.length > 17) {
-        return; // Si tiene más de 17 dígitos, no hacer nada y salir de la función
-    }
-
-    if (digits.length == 17) {
+    if(digits.length == 17){
         var text = digits;
-        // Número de la tienda
-        var pdv = text.substring(1, 2) + text.substring(12, 13) + text.substring(8, 9) + text.substring(10, 11);
-        Qualtrics.SurveyEngine.setEmbeddedData('PDV', pdv);
+        //Numero de la tienda
+        var pdv1 = text.substring(1, 2);
+        var pdv2 = text.substring(12, 13);
+        var pdv3 = text.substring(8, 9);
+        var pdv4 = text.substring(10, 11);
+        var pdv = pdv1 + pdv2 + pdv3 + pdv4;
+        
+        Qualtrics.SurveyEngine.setEmbeddedData( 'PDV', pdv);
+        //alert(pdv);
 
         // País
         var pais = text.substring(0, 1);
@@ -88,8 +92,6 @@ function validCode(digits, that) {
             case "3":
                 pais_nom = "SLV";
                 break;
-            default:
-                pais_nom = "Desconocido";
         }
         Qualtrics.SurveyEngine.setEmbeddedData('Pais_id', pais);
         Qualtrics.SurveyEngine.setEmbeddedData('Pais', pais_nom);
@@ -179,12 +181,8 @@ function validCode(digits, that) {
             case "7":
                 if (pais == "2") {
                     canal = "3PD";
-                } else {
-                    canal = "Desconocido";
                 }
                 break;
-            default:
-                canal = "Desconocido";
         }
         Qualtrics.SurveyEngine.setEmbeddedData('Canal', canal);
 
@@ -218,7 +216,6 @@ function validCode(digits, that) {
         // Validaciones
         if (pais != "1" && pais != "2" && pais != "3") {
             pase = false;
-            alert("El país no es válido");
             msj = "Verifique que el código sea válido en el valor del pais";
             valor += 1;
             localStorage.setItem('miVariable', valor);
@@ -227,14 +224,12 @@ function validCode(digits, that) {
         var diferenciaEnDias = Math.floor((fechaActual - fecha_comp) / (1000 * 60 * 60 * 24));
         if (diferenciaEnDias > 7) {
             pase = false;
-            alert("La fecha no puede ser mayor a 7 días" + diferenciaEnDias);
             msj = "Verifique que el código sea válido en la fecha";
             valor += 1;
             localStorage.setItem('miVariable', valor);
         }
 
         if (diferenciaEnDias < 0) {
-            alert("La fecha no puede ser mayor a la actual " + diferenciaEnDias);
             pase = false;
             msj = "Verifique que el código sea válido en el valor de los dias";
             valor += 1;
@@ -243,18 +238,17 @@ function validCode(digits, that) {
 
         if (canal_num > 7 || canal_num == 0 || canal == "Desconocido") {
             pase = false;
-            alert("El canal no es válido");
             msj = "Verifique que el código sea válido en el valor del canal";
             valor += 1;
             localStorage.setItem('miVariable', valor);
         }
         if (!PDVS.includes(parseInt(pdv))) {
             pase = false;
-            alert("El PDV no es válido");
             msj = "Verifique que el código sea válido en el valor del PDV";
             valor += 1;
             localStorage.setItem('miVariable', valor);
         }
+
         // Mostrar u ocultar el botón "Siguiente" y el mensaje de error
         if (pase == true || valor >= 2) {
             var var_algo = "Algoritmo invalido";
@@ -292,6 +286,7 @@ function validCode(digits, that) {
             if (!textoError.parentNode) {
                 contenedorPregunta.appendChild(textoError);
             }
+
         } else {
             textoError.style.display = 'none'; // Ocultar el mensaje si no hay error
         }

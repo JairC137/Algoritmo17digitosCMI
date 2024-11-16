@@ -44,7 +44,7 @@ function validCode(digits, that) {
         
 		Qualtrics.SurveyEngine.setEmbeddedData( 'PDV', pdv);
 		
-		//alert(pdv)
+		alert(pdv)
 
 		//Pais
 		var pais = text.substring(0, 1);
